@@ -459,6 +459,8 @@ export const PhotoBooth: React.FC = () => {
     // Finished capturing
     console.log("Photo sequence complete");
     setIsCapturing(false);
+    setIsCameraActive(false);
+    setIsCameraReady(false);
     
     // Show modal
     setShowModal(true);
@@ -950,7 +952,7 @@ export const PhotoBooth: React.FC = () => {
     
     // Reset camera ready state with a delay
     setTimeout(() => {
-      setIsCameraReady(false);
+      setIsCameraReady(true);
     }, 100);
   }, []);
   
@@ -966,7 +968,7 @@ export const PhotoBooth: React.FC = () => {
     
     // Reset camera ready state with a delay
     setTimeout(() => {
-      setIsCameraReady(false);
+      setIsCameraReady(true);
     }, 100);
   }, []);
 
@@ -1034,7 +1036,7 @@ export const PhotoBooth: React.FC = () => {
           setIsCameraActive(true);
           // Reset camera ready state with a delay
           setTimeout(() => {
-            setIsCameraReady(false);
+            setIsCameraReady(true);
           }, 100);
         }
       }
@@ -1056,8 +1058,6 @@ export const PhotoBooth: React.FC = () => {
 
   return (
     <PhotoBoothContainer>
-      <h1>Snapshot Photobooth</h1>
-      
       <HelpIconContainer className="help-icon-container">
         <HelpIcon onClick={toggleTooltip}>?</HelpIcon>
         <Tooltip $visible={showTooltip}>
