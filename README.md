@@ -1,46 +1,74 @@
-# Getting Started with Create React App
+# Snapshot Photobooth
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, responsive web application that allows users to take photos using their device's camera, apply filters, and save or share the results. Built with React and TypeScript.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- Take multiple photos in sequence with a customizable timer
+- Apply various filters to your photos
+- Customize settings like photo count, interval, and countdown
+- Save and share your photo strip
+- Works on both desktop and mobile devices
+- Modern, responsive UI
 
-### `npm start`
+## Technologies Used
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- React
+- TypeScript
+- Styled Components
+- React Webcam
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Getting Started
 
-### `npm test`
+### Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Node.js (v14 or later)
+- npm or yarn
 
-### `npm run build`
+### Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Clone the repository
+```
+git clone https://github.com/yourusername/snapshot-photobooth.git
+cd snapshot-photobooth
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. Install dependencies
+```
+npm install
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+3. Start the development server
+```
+npm start
+```
 
-### `npm run eject`
+4. Open your browser and navigate to `http://localhost:3000`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Usage
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Allow camera access when prompted
+2. Customize settings if desired (number of photos, interval, countdown)
+3. Select a filter if desired
+4. Click "Take Photos" to start the photo sequence
+5. After photos are taken, you can save or share them
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## Camera Access
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+This application requires access to your device's camera. When you first use the app, your browser will ask for permission to access the camera. You must grant this permission for the app to work.
 
-## Learn More
+## Mobile Usage
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+For the best experience on mobile devices:
+- Use the app in portrait orientation
+- Make sure your device has a front-facing camera
+- For iOS devices, use Safari browser
+- For Android devices, use Chrome browser
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Privacy
+
+All photos are processed locally in your browser. No images are uploaded to any server unless you explicitly choose to share them.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
