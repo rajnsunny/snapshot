@@ -110,29 +110,6 @@ const DateStamp = styled.div<{ theme: ThemeColors }>`
   transition: color 0.3s ease;
 `;
 
-const ThemeToggleContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-  gap: 10px;
-`;
-
-const ThemeButton = styled.button<{ $active: boolean }>`
-  padding: 6px 12px;
-  border: none;
-  border-radius: 20px;
-  font-size: 12px;
-  cursor: pointer;
-  background-color: ${props => props.$active ? '#FFD700' : '#333'};
-  color: ${props => props.$active ? '#000' : '#fff'};
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  }
-`;
-
 export const PhotoStrip: React.FC<PhotoStripProps> = ({ 
   photos, 
   filter,
@@ -187,33 +164,10 @@ export const PhotoStrip: React.FC<PhotoStripProps> = ({
     });
   }, [filter, photos, cssFilter, currentFilterIsSpecial]);
   
-  const toggleTheme = (theme: 'dark' | 'light') => {
-    console.log(`PhotoStrip: Setting theme to ${theme}`);
-    setCurrentTheme(theme);
-    if (onThemeChange) {
-      onThemeChange(theme);
-    }
-  };
-  
   return (
     <StripContainer id="photo-strip">
       {photos.length > 0 && (
-        <>
-          <ThemeToggleContainer>
-            <ThemeButton 
-              $active={currentTheme === 'dark'} 
-              onClick={() => toggleTheme('dark')}
-            >
-              Dark Background
-            </ThemeButton>
-            <ThemeButton 
-              $active={currentTheme === 'light'} 
-              onClick={() => toggleTheme('light')}
-            >
-              Light Background
-            </ThemeButton>
-          </ThemeToggleContainer>
-          
+        <> 
           <PhotosGrid theme={themes[currentTheme]}>
             <GridContainer columns={columns} rows={rows} theme={themes[currentTheme]}>
               {photos.slice(0, columns * rows).map((photo, index) => (

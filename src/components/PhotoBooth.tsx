@@ -151,65 +151,6 @@ const MadeByText = styled.p`
   font-size: 14px;
 `;
 
-const ControlsRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-top: 20px;
-`;
-
-const ThemeToggleContainer = styled.div`
-  display: flex;
-  gap: 10px;
-`;
-
-const ThemeButton = styled.button<{ $active: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 50%;
-  background-color: ${props => props.$active ? '#FFD700' : '#444'};
-  color: ${props => props.$active ? '#000' : '#fff'};
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 18px;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  }
-`;
-
-// Update the Button styled component to use a data attribute instead of primary
-const Button = styled.button<{ $primary?: boolean }>`
-  padding: 12px 24px;
-  border: none;
-  border-radius: 50px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background-color: ${props => props.$primary ? '#FFD700' : '#333'};
-  color: ${props => props.$primary ? '#000' : '#fff'};
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-    background-color: ${props => props.$primary ? '#FFC400' : '#444'};
-  }
-  
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-`;
-
 const CameraErrorMessage = styled.div`
   background-color: #ff5252;
   color: white;
@@ -258,7 +199,6 @@ export const PhotoBooth: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
-  const [webcamReady, setWebcamReady] = useState(false);
   const [settings, setSettings] = useState<PhotoBoothSettings>({
     photoCount: 3,
     intervalSeconds: 1,
@@ -926,24 +866,6 @@ export const PhotoBooth: React.FC = () => {
     });
   };
 
-  // Function to open modal and close camera
-  const openModal = useCallback(() => {
-    setShowModal(true);
-    setIsCameraActive(false);
-    
-    // Stop the webcam stream when modal opens
-    if (webcamRef.current && webcamRef.current.video && webcamRef.current.video.srcObject) {
-      const stream = webcamRef.current.video.srcObject as MediaStream;
-      const tracks = stream.getTracks();
-      
-      tracks.forEach(track => {
-        track.stop();
-      });
-      
-      webcamRef.current.video.srcObject = null;
-    }
-  }, [webcamRef]);
-  
   // Function to close modal and reopen camera
   const closeModal = useCallback(() => {
     setShowModal(false);
