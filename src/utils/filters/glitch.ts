@@ -4,7 +4,7 @@ import { FilterProcessor } from './types';
  * Applies an enhanced digital glitch effect to an image
  * with more dramatic visual artifacts and RGB shifts
  */
-export const glitchFilter: FilterProcessor = (ctx, img) => {
+export const applyGlitchEffect: FilterProcessor = (ctx, img) => {
   const width = ctx.canvas.width;
   const height = ctx.canvas.height;
   

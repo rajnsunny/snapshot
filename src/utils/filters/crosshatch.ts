@@ -3,7 +3,7 @@ import { FilterProcessor } from './types';
 /**
  * Applies a crosshatch drawing effect to an image
  */
-export const crosshatchFilter: FilterProcessor = (ctx, img) => {
+export const applyCrosshatchEffect: FilterProcessor = (ctx, img) => {
   const width = ctx.canvas.width;
   const height = ctx.canvas.height;
   

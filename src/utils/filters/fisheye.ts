@@ -3,7 +3,7 @@ import { FilterProcessor } from './types';
 /**
  * Applies a fisheye lens distortion effect to an image
  */
-export const fisheyeFilter: FilterProcessor = (ctx, img) => {
+export const applyFisheyeEffect: FilterProcessor = (ctx, img) => {
   const width = ctx.canvas.width;
   const height = ctx.canvas.height;
   

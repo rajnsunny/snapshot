@@ -1,17 +1,17 @@
 import { FilterProcessor } from './types';
-import { fisheyeFilter } from './fisheye';
-import { glitchFilter } from './glitch';
-import { crosshatchFilter } from './crosshatch';
+import { applyFisheyeEffect} from './fisheye';
+import { applyGlitchEffect} from './glitch';
+import { applyCrosshatchEffect} from './crosshatch';
 
 // Export all filter types and implementations
 export type { FilterProcessor } from './types';
-export { fisheyeFilter } from './fisheye';
-export { glitchFilter } from './glitch';
-export { crosshatchFilter } from './crosshatch';
+export { applyFisheyeEffect } from './fisheye';
+export {  applyGlitchEffect} from './glitch';
+export { applyCrosshatchEffect } from './crosshatch';
 
 // Filter registry - maps filter keys to their processing functions
 export const filterRegistry: Record<string, FilterProcessor> = {
-  fisheye: fisheyeFilter,
-  glitch: glitchFilter,
-  crosshatch: crosshatchFilter
+  fisheye: applyFisheyeEffect,
+  glitch: applyGlitchEffect,
+  crosshatch: applyCrosshatchEffect
 }; 

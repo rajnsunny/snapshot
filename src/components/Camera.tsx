@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import styled from 'styled-components';
+import {filterRegistry} from '../utils/filters/index';
 
 interface CameraProps {
   webcamRef: React.RefObject<Webcam | null>;
@@ -133,250 +134,6 @@ const PhotoCountOverlay = styled.div`
   }
 `;
 
-// Function to apply fisheye effect
-const applyFisheyeEffect = (ctx: CanvasRenderingContext2D, img: HTMLVideoElement) => {
-  const width = ctx.canvas.width;
-  const height = ctx.canvas.height;
-  
-  // Clear the canvas
-  ctx.clearRect(0, 0, width, height);
-  
-  // Draw the original image first
-  ctx.drawImage(img, 0, 0, width, height);
-  
-  // Get the image data
-  const imageData = ctx.getImageData(0, 0, width, height);
-  const data = imageData.data;
-  const newImageData = ctx.createImageData(width, height);
-  const newData = newImageData.data;
-  
-  // Parameters for fisheye effect
-  const centerX = width / 2;
-  const centerY = height / 2;
-  const radius = Math.min(width, height) / 2;
-  const strength = 2.5; // Adjust for stronger/weaker effect
-  
-  // Apply fisheye distortion
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      // Calculate normalized coordinates
-      const nx = (x - centerX) / radius;
-      const ny = (y - centerY) / radius;
-      const r = Math.sqrt(nx * nx + ny * ny);
-      
-      // Skip pixels outside the circle
-      if (r > 1) {
-        // Just copy the original pixel
-        const i = (y * width + x) * 4;
-        newData[i] = data[i];
-        newData[i + 1] = data[i + 1];
-        newData[i + 2] = data[i + 2];
-        newData[i + 3] = data[i + 3];
-        continue;
-      }
-      
-      // Apply fisheye formula
-      const newR = Math.pow(r, strength);
-      const newNx = nx / r * newR;
-      const newNy = ny / r * newR;
-      
-      // Convert back to pixel coordinates
-      const newX = Math.round(newNx * radius + centerX);
-      const newY = Math.round(newNy * radius + centerY);
-      
-      // Ensure coordinates are within bounds
-      if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
-        const newI = (y * width + x) * 4;
-        const origI = (newY * width + newX) * 4;
-        
-        // Copy the pixel
-        newData[newI] = data[origI];
-        newData[newI + 1] = data[origI + 1];
-        newData[newI + 2] = data[origI + 2];
-        newData[newI + 3] = data[origI + 3];
-      }
-    }
-  }
-  
-  // Put the new image data back
-  ctx.putImageData(newImageData, 0, 0);
-};
-
-// Function to apply glitch effect
-const applyGlitchEffect = (ctx: CanvasRenderingContext2D, img: HTMLVideoElement) => {
-  const width = ctx.canvas.width;
-  const height = ctx.canvas.height;
-  
-  // Check if canvas dimensions are valid
-  if (width <= 0 || height <= 0) {
-    console.error("Invalid canvas dimensions:", width, height);
-    return;
-  }
-  
-  // Clear the canvas
-  ctx.clearRect(0, 0, width, height);
-  
-  // Draw the original image first
-  ctx.drawImage(img, 0, 0, width, height);
-  
-  // Get the image data
-  try {
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-    
-    // Number of glitch lines
-    const numGlitches = Math.floor(Math.random() * 5) + 3;
-    
-    // Apply glitch effect
-    for (let i = 0; i < numGlitches; i++) {
-      // Random position for glitch
-      const y = Math.floor(Math.random() * height);
-      const glitchLength = Math.floor(Math.random() * 50) + 20;
-      const shiftAmount = Math.floor(Math.random() * 20) - 10;
-      
-      // Shift pixels horizontally
-      for (let j = 0; j < glitchLength; j++) {
-        const row = y + j;
-        if (row >= height) break;
-        
-        for (let x = 0; x < width; x++) {
-          const newX = (x + shiftAmount + width) % width;
-          const i = (row * width + x) * 4;
-          const newI = (row * width + newX) * 4;
-          
-          // Shift RGB channels
-          data[i] = data[newI];
-          data[i + 1] = data[newI + 1];
-          data[i + 2] = data[newI + 2];
-        }
-      }
-    }
-    
-    // Put the modified image data back
-    ctx.putImageData(imageData, 0, 0);
-  } catch (error) {
-    console.error("Error applying glitch effect:", error);
-    // If there's an error, just draw the original image
-    ctx.drawImage(img, 0, 0, width, height);
-  }
-};
-
-// Function to apply crosshatch effect
-const applyCrosshatchEffect = (ctx: CanvasRenderingContext2D, img: HTMLVideoElement) => {
-  const width = ctx.canvas.width;
-  const height = ctx.canvas.height;
-  
-  // Clear the canvas
-  ctx.clearRect(0, 0, width, height);
-  
-  // First apply grayscale
-  ctx.filter = 'grayscale(100%) contrast(150%)';
-  ctx.drawImage(img, 0, 0, width, height);
-  ctx.filter = 'none';
-  
-  // Get the grayscale image data
-  const imageData = ctx.getImageData(0, 0, width, height);
-  const data = imageData.data;
-  
-  // Create a new canvas for the crosshatch
-  const tempCanvas = document.createElement('canvas');
-  tempCanvas.width = width;
-  tempCanvas.height = height;
-  const tempCtx = tempCanvas.getContext('2d');
-  
-  if (!tempCtx) return;
-  
-  // Clear the temp canvas
-  tempCtx.fillStyle = 'white';
-  tempCtx.fillRect(0, 0, width, height);
-  
-  // Set line properties
-  tempCtx.strokeStyle = 'black';
-  tempCtx.lineCap = 'round';
-  
-  // Calculate appropriate spacing based on image size
-  const baseSpacing = Math.max(8, Math.min(20, Math.floor(Math.min(width, height) / 40)));
-  
-  // Draw lines at different angles
-  const angles = [0, 45, 90, 135];
-  
-  // Threshold values for different line densities
-  const thresholds = [220, 180, 120, 60];
-  
-  // Draw the crosshatch pattern for each angle
-  angles.forEach((angle) => {
-    // Convert angle to radians
-    const radians = (angle * Math.PI) / 180;
-    const cos = Math.cos(radians);
-    const sin = Math.sin(radians);
-    
-    // Set line width
-    tempCtx.lineWidth = 1;
-    
-    // Set spacing
-    const spacing = baseSpacing;
-    
-    // Start drawing lines
-    tempCtx.beginPath();
-    
-    // Calculate line positions based on angle
-    const length = Math.sqrt(width * width + height * height);
-    const step = spacing;
-    
-    for (let i = -length; i < length; i += step) {
-      // Calculate start and end points for the line
-      let startX, startY, endX, endY;
-      
-      if (Math.abs(cos) > Math.abs(sin)) {
-        // More horizontal line
-        startX = i / cos;
-        startY = 0;
-        endX = (i - height * sin) / cos;
-        endY = height;
-      } else {
-        // More vertical line
-        startX = 0;
-        startY = i / sin;
-        endX = width;
-        endY = (i - width * cos) / sin;
-      }
-      
-      // Draw the line
-      tempCtx.moveTo(startX, startY);
-      tempCtx.lineTo(endX, endY);
-    }
-    
-    tempCtx.stroke();
-  });
-  
-  // Get the crosshatch pattern
-  const patternData = tempCtx.getImageData(0, 0, width, height);
-  const patternPixels = patternData.data;
-  
-  // Apply the crosshatch based on brightness
-  for (let i = 0; i < data.length; i += 4) {
-    const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
-    
-    // Determine which threshold this pixel falls under
-    let thresholdIndex = thresholds.findIndex(t => brightness < t);
-    if (thresholdIndex === -1) thresholdIndex = thresholds.length;
-    
-    // If below threshold, use the pattern pixel, otherwise use white
-    if (thresholdIndex < thresholds.length) {
-      data[i] = Math.min(data[i], patternPixels[i]);
-      data[i + 1] = Math.min(data[i + 1], patternPixels[i + 1]);
-      data[i + 2] = Math.min(data[i + 2], patternPixels[i + 2]);
-    } else {
-      data[i] = 255;
-      data[i + 1] = 255;
-      data[i + 2] = 255;
-    }
-  }
-  
-  // Put the modified image data back
-  ctx.putImageData(imageData, 0, 0);
-};
-
 export const Camera: React.FC<CameraProps> = ({
   webcamRef,
   filter,
@@ -465,13 +222,13 @@ export const Camera: React.FC<CameraProps> = ({
         // Apply the appropriate filter
         switch (specialFilter) {
           case 'fisheye':
-            applyFisheyeEffect(ctx, video);
+            filterRegistry.applyFisheyeEffect(ctx,video);
             break;
           case 'glitch':
-            applyGlitchEffect(ctx, video);
+            filterRegistry.applyGlitchEffect(ctx, video);
             break;
           case 'crosshatch':
-            applyCrosshatchEffect(ctx, video);
+            filterRegistry.applyCrosshatchEffect(ctx, video);
             break;
           default:
             // Just draw the video frame
