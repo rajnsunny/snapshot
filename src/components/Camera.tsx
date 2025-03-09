@@ -207,6 +207,12 @@ const applyGlitchEffect = (ctx: CanvasRenderingContext2D, img: HTMLVideoElement)
   const width = ctx.canvas.width;
   const height = ctx.canvas.height;
   
+  // Check if canvas dimensions are valid
+  if (width <= 0 || height <= 0) {
+    console.error("Invalid canvas dimensions:", width, height);
+    return;
+  }
+  
   // Clear the canvas
   ctx.clearRect(0, 0, width, height);
   
@@ -214,39 +220,45 @@ const applyGlitchEffect = (ctx: CanvasRenderingContext2D, img: HTMLVideoElement)
   ctx.drawImage(img, 0, 0, width, height);
   
   // Get the image data
-  const imageData = ctx.getImageData(0, 0, width, height);
-  const data = imageData.data;
-  
-  // Number of glitch lines
-  const numGlitches = Math.floor(Math.random() * 5) + 3;
-  
-  // Apply glitch effect
-  for (let i = 0; i < numGlitches; i++) {
-    // Random position for glitch
-    const y = Math.floor(Math.random() * height);
-    const glitchLength = Math.floor(Math.random() * 50) + 20;
-    const shiftAmount = Math.floor(Math.random() * 20) - 10;
+  try {
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
     
-    // Shift pixels horizontally
-    for (let j = 0; j < glitchLength; j++) {
-      const row = y + j;
-      if (row >= height) break;
+    // Number of glitch lines
+    const numGlitches = Math.floor(Math.random() * 5) + 3;
+    
+    // Apply glitch effect
+    for (let i = 0; i < numGlitches; i++) {
+      // Random position for glitch
+      const y = Math.floor(Math.random() * height);
+      const glitchLength = Math.floor(Math.random() * 50) + 20;
+      const shiftAmount = Math.floor(Math.random() * 20) - 10;
       
-      for (let x = 0; x < width; x++) {
-        const newX = (x + shiftAmount + width) % width;
-        const i = (row * width + x) * 4;
-        const newI = (row * width + newX) * 4;
+      // Shift pixels horizontally
+      for (let j = 0; j < glitchLength; j++) {
+        const row = y + j;
+        if (row >= height) break;
         
-        // Shift RGB channels
-        data[i] = data[newI];
-        data[i + 1] = data[newI + 1];
-        data[i + 2] = data[newI + 2];
+        for (let x = 0; x < width; x++) {
+          const newX = (x + shiftAmount + width) % width;
+          const i = (row * width + x) * 4;
+          const newI = (row * width + newX) * 4;
+          
+          // Shift RGB channels
+          data[i] = data[newI];
+          data[i + 1] = data[newI + 1];
+          data[i + 2] = data[newI + 2];
+        }
       }
     }
+    
+    // Put the modified image data back
+    ctx.putImageData(imageData, 0, 0);
+  } catch (error) {
+    console.error("Error applying glitch effect:", error);
+    // If there's an error, just draw the original image
+    ctx.drawImage(img, 0, 0, width, height);
   }
-  
-  // Put the modified image data back
-  ctx.putImageData(imageData, 0, 0);
 };
 
 // Function to apply crosshatch effect
@@ -379,49 +391,56 @@ export const Camera: React.FC<CameraProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [debug, setDebug] = useState<string>('');
-  const [canvasWidth, setCanvasWidth] = useState<number>(0);
-  const [canvasHeight, setCanvasHeight] = useState<number>(0);
+  const [canvasWidth, setCanvasWidth] = useState<number>(640); // Default width
+  const [canvasHeight, setCanvasHeight] = useState<number>(480); // Default height
   const animationRef = useRef<number | null>(null);
   
-  // Set up canvas size when webcam is ready
+  // Initialize canvas size when video is ready
   useEffect(() => {
     const updateCanvasSize = () => {
       if (webcamRef.current && webcamRef.current.video) {
         const video = webcamRef.current.video;
-        setCanvasWidth(video.videoWidth);
-        setCanvasHeight(video.videoHeight);
+        if (video.videoWidth > 0 && video.videoHeight > 0) {
+          setCanvasWidth(video.videoWidth);
+          setCanvasHeight(video.videoHeight);
+          console.log(`Canvas size updated: ${video.videoWidth}x${video.videoHeight}`);
+        } else {
+          console.warn("Video dimensions not available yet");
+          // Try again in a moment
+          setTimeout(updateCanvasSize, 500);
+        }
       }
     };
     
-    // Update canvas size when webcam is ready
     if (webcamRef.current && webcamRef.current.video) {
-      updateCanvasSize();
-    }
-    
-    // Set up resize observer
-    const resizeObserver = new ResizeObserver(() => {
-      updateCanvasSize();
-    });
-    
-    if (webcamRef.current && webcamRef.current.video) {
-      resizeObserver.observe(webcamRef.current.video);
+      if (webcamRef.current.video.readyState >= 2) {
+        updateCanvasSize();
+      } else {
+        webcamRef.current.video.onloadeddata = updateCanvasSize;
+      }
     }
     
     return () => {
-      resizeObserver.disconnect();
+      if (webcamRef.current && webcamRef.current.video) {
+        webcamRef.current.video.onloadeddata = null;
+      }
     };
   }, [webcamRef]);
   
-  // Apply special filter effect to canvas
+  // Apply special filter effects
   useEffect(() => {
     if (!specialFilter || !canvasRef.current || !webcamRef.current || !webcamRef.current.video) {
       return;
     }
     
+    // Make sure canvas dimensions are valid
+    if (canvasWidth <= 0 || canvasHeight <= 0) {
+      console.warn("Invalid canvas dimensions, skipping filter application");
+      return;
+    }
+    
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    const video = webcamRef.current.video;
-    
     if (!ctx) return;
     
     // Set canvas size
@@ -430,25 +449,41 @@ export const Camera: React.FC<CameraProps> = ({
     
     // Function to draw the current frame with the filter
     const drawFrame = () => {
-      if (!ctx || !video) return;
-      
-      // Apply the appropriate filter
-      switch (specialFilter) {
-        case 'fisheye':
-          applyFisheyeEffect(ctx, video);
-          break;
-        case 'glitch':
-          applyGlitchEffect(ctx, video);
-          break;
-        case 'crosshatch':
-          applyCrosshatchEffect(ctx, video);
-          break;
-        default:
-          // Just draw the video frame
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      if (!webcamRef.current || !webcamRef.current.video || !ctx || !specialFilter) {
+        return;
       }
       
-      // Request next frame
+      const video = webcamRef.current.video;
+      
+      // Make sure video is playing and has dimensions
+      if (video.readyState < 2 || video.paused || video.ended) {
+        animationRef.current = requestAnimationFrame(drawFrame);
+        return;
+      }
+      
+      try {
+        // Apply the appropriate filter
+        switch (specialFilter) {
+          case 'fisheye':
+            applyFisheyeEffect(ctx, video);
+            break;
+          case 'glitch':
+            applyGlitchEffect(ctx, video);
+            break;
+          case 'crosshatch':
+            applyCrosshatchEffect(ctx, video);
+            break;
+          default:
+            // Just draw the video frame
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        }
+      } catch (error) {
+        console.error(`Error applying ${specialFilter} filter:`, error);
+        // Just draw the video frame on error
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      }
+      
+      // Request the next frame
       animationRef.current = requestAnimationFrame(drawFrame);
     };
     
