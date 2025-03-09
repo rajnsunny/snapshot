@@ -157,7 +157,7 @@ export const createPhotoStrip = async (photos: string[], filter: string): Promis
   ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
   ctx.font = 'italic 12px Arial';
   ctx.textAlign = 'right';
-  ctx.fillText('Snapshot Photobooth', canvas.width - padding, canvas.height - padding);
+  ctx.fillText('Snapshot', canvas.width - padding, canvas.height - padding);
   
   // Convert canvas to data URL
   return canvas.toDataURL('image/jpeg', 0.95);

@@ -222,13 +222,13 @@ export const Camera: React.FC<CameraProps> = ({
         // Apply the appropriate filter
         switch (specialFilter) {
           case 'fisheye':
-            filterRegistry.applyFisheyeEffect(ctx,video);
+            filterRegistry.fisheye(ctx,video);
             break;
           case 'glitch':
-            filterRegistry.applyGlitchEffect(ctx, video);
+            filterRegistry.glitch(ctx, video);
             break;
           case 'crosshatch':
-            filterRegistry.applyCrosshatchEffect(ctx, video);
+            filterRegistry.crosshatch(ctx, video);
             break;
           default:
             // Just draw the video frame
@@ -280,7 +280,7 @@ export const Camera: React.FC<CameraProps> = ({
           />
         )}
         
-        <AppSignature>Snapshot Photobooth</AppSignature>
+        <AppSignature>Snapshot</AppSignature>
         
         {debug && <DebugInfo>{debug}</DebugInfo>}
       </WebcamContainer>
